@@ -9,27 +9,33 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    @Query("SELECT COUNT(p) from Post p WHERE p.published = true")
-    long getPublishedCount();
+        @Query("SELECT COUNT(p) from Post p WHERE p.published = true")
+        long getPublishedCount();
 
-    Page<Post> findByPublished(boolean published, PageRequest page);
+        @Query("SELECT COUNT(p) from Post p WHERE p.published = false")
+        long getUnpublishedCount();
 
-    @Query("SELECT COUNT(p) from Post p WHERE p.categoryId = :categoryId")
-    long getCountByCategory(long categoryId);
+        Page<Post> findByPublished(boolean published, PageRequest page);
 
-    Page<Post> findAllByCategoryId(long categoryId, PageRequest page);
+        @Query("SELECT p From Post p WHERE p.published = false")
+        Page<Post> findByUnpublished(boolean published, PageRequest page);
 
-    @Query("SELECT COUNT(p) FROM Post p WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    long getCountBySearch(String keyword);
+        @Query("SELECT COUNT(p) from Post p WHERE p.categoryId = :categoryId")
+        long getCountByCategory(long categoryId);
 
-    @Query("SELECT p FROM Post p WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<Post> searchByKeyword(String keyword, PageRequest page);
+        Page<Post> findAllByCategoryId(long categoryId, PageRequest page);
 
-    @Query("SELECT COUNT(p) from Post p WHERE p.adminId = :adminId")
-    long getCountByAdmin(long adminId);
+        @Query("SELECT COUNT(p) FROM Post p WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                        "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+        long getCountBySearch(String keyword);
 
-    Page<Post> findAllByAdmin(long adminId, PageRequest page);
+        @Query("SELECT p FROM Post p WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                        "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+        Page<Post> searchByKeyword(String keyword, PageRequest page);
+
+        @Query("SELECT COUNT(p) from Post p WHERE p.adminId = :adminId")
+        long getCountByAdmin(long adminId);
+
+        Page<Post> findAllByAdminId(long adminId, PageRequest page);
 
 }

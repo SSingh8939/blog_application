@@ -1,35 +1,42 @@
 package com.blog.myblogs.comment;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.blog.myblogs.post.Post;
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class Comment {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private String content;
     private String author;
+
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    private Post blog;
+    private LocalDateTime updatedAt;
 
-    @ManyToOne
-    private Comment parentComment;
+    private Long parentId;
 
-    @OneToMany(mappedBy = "parentComment")
-    private List<Comment> replies;
+    @Builder.Default
+    transient private List<Comment> replies = new ArrayList<>();
+
 }

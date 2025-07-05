@@ -1,21 +1,20 @@
 package com.blog.myblogs.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ResponseGenerator {
-    public static ResponseEntity<Object> generateResponse(
+    public static <T> ResponseEntity<ApiResponse<T>> generateResponse(
             String message,
             HttpStatus status,
-            Object responseObj) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("message", message);
-        map.put("data", responseObj);
+            T data) {
 
-        return new ResponseEntity<>(map, status);
+        ApiResponse<T> response = ApiResponse.<T>builder()
+                .message(message)
+                .status(status.value())
+                .data(data).build();
+
+        return new ResponseEntity<>(response, status);
     }
 
 }

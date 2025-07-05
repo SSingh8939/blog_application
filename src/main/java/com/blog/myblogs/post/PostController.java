@@ -1,121 +1,159 @@
 package com.blog.myblogs.post;
 
+import com.blog.myblogs.common.ApiResponse;
+import com.blog.myblogs.common.ResponseGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api/post")
 public class PostController {
 
     @Autowired
     private PostService postService;
 
     @GetMapping("/count")
-    public ResponseEntity<Object> getPostsCount() {
-        return postService.getAllPostCount();
+    public ResponseEntity<ApiResponse<Long>> getPostsCount() {
+        long count = postService.getAllPostCount();
+        return ResponseGenerator.generateResponse("Post count fetched successfully", HttpStatus.OK, count);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllPosts(
+    public ResponseEntity<ApiResponse<List<Post>>> getAllPosts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return postService.getAllPosts(page - 1, size);
+        List<Post> posts = postService.getAllPosts(page - 1, size);
+        return ResponseGenerator.generateResponse("Posts fetched successfully", HttpStatus.OK, posts);
     }
 
-    @GetMapping("/published/count")
-    public ResponseEntity<Object> getPublishedPostsCount() {
-        return postService.getAllPublishedPostCount();
+    @GetMapping("/count/published")
+    public ResponseEntity<ApiResponse<Long>> getPublishedPostsCount() {
+        long count = postService.getAllPublishedPostCount();
+        return ResponseGenerator.generateResponse("Published post count fetched successfully", HttpStatus.OK, count);
     }
 
     @GetMapping("/published")
-    public ResponseEntity<Object> getAllPublishedPosts(
+    public ResponseEntity<ApiResponse<List<Post>>> getAllPublishedPosts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return postService.getAllPublishedPosts(page - 1, size);
-
+        List<Post> posts = postService.getAllPublishedPosts(page - 1, size);
+        return ResponseGenerator.generateResponse("Published posts fetched successfully", HttpStatus.OK, posts);
     }
 
-    @GetMapping("/category/count/{id}")
-    public ResponseEntity<Object> getPostsCountByCategory(@PathVariable long id) {
-        return postService.getAllPostCountByCategory(id);
+    @GetMapping("/count/unpublished")
+    public ResponseEntity<ApiResponse<Long>> getUnpublishedPostsCount() {
+        long count = postService.getAllUnpublishedPostCount();
+        return ResponseGenerator.generateResponse("Unpublished post count fetched successfully", HttpStatus.OK, count);
+    }
+
+    @GetMapping("/unpublished")
+    public ResponseEntity<ApiResponse<List<Post>>> getAllUnpublishedPosts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        List<Post> posts = postService.getAllUnpublishedPosts(page - 1, size);
+        return ResponseGenerator.generateResponse("Unpublished posts fetched successfully", HttpStatus.OK, posts);
+    }
+
+    @GetMapping("/count/category/{id}")
+    public ResponseEntity<ApiResponse<Long>> getPostsCountByCategory(@PathVariable long id) {
+        long count = postService.getAllPostCountByCategory(id);
+        return ResponseGenerator.generateResponse("Post count by category fetched successfully", HttpStatus.OK, count);
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<Object> getPostsByCategory(
+    public ResponseEntity<ApiResponse<List<Post>>> getPostsByCategory(
             @PathVariable long categoryId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return postService.getPostsByCategory(categoryId, page - 1, size);
+        List<Post> posts = postService.getPostsByCategory(categoryId, page - 1, size);
+        return ResponseGenerator.generateResponse("Posts by category fetched successfully", HttpStatus.OK, posts);
     }
 
     @GetMapping("/count/admin/{id}")
-    public ResponseEntity<Object> getPostsCountByAdmin(@PathVariable long id) {
-        return postService.getAllPostCountByAdmin(id);
+    public ResponseEntity<ApiResponse<Long>> getPostsCountByAdmin(@PathVariable long id) {
+        long count = postService.getAllPostCountByAdmin(id);
+        return ResponseGenerator.generateResponse("Post count by admin fetched successfully", HttpStatus.OK, count);
     }
 
     @GetMapping("/admin/{adminId}")
-    public ResponseEntity<Object> getPostsByAdmin(
+    public ResponseEntity<ApiResponse<List<Post>>> getPostsByAdmin(
             @PathVariable long adminId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return postService.getPostsByAdmin(adminId, page - 1, size);
+        List<Post> posts = postService.getPostsByAdmin(adminId, page - 1, size);
+        return ResponseGenerator.generateResponse("Posts by admin fetched successfully", HttpStatus.OK, posts);
     }
 
-    @GetMapping("/search/count")
-    public ResponseEntity<Object> getPostsCountByCategory(@RequestParam String keyword) {
-        return postService.getAllPostCountBySearch(keyword);
+    @GetMapping("/count/search")
+    public ResponseEntity<ApiResponse<Long>> getPostsCountBySearch(@RequestParam String keyword) {
+        long count = postService.getAllPostCountBySearch(keyword);
+        return ResponseGenerator.generateResponse("Search result count fetched successfully", HttpStatus.OK, count);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> searchPosts(
+    public ResponseEntity<ApiResponse<List<Post>>> searchPosts(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return postService.searchPosts(keyword, page - 1, size);
+        List<Post> posts = postService.searchPosts(keyword, page - 1, size);
+        return ResponseGenerator.generateResponse("Search results fetched successfully", HttpStatus.OK, posts);
     }
 
     @PostMapping
-    public ResponseEntity<Object> savePost(@RequestBody Post post) {
-        return postService.savePost(post);
-
+    public ResponseEntity<ApiResponse<Post>> savePost(@RequestBody PostDTO dto) {
+        Post saved = postService.savePost(dto);
+        return ResponseGenerator.generateResponse("Post saved successfully", HttpStatus.CREATED, saved);
     }
 
-    @PutMapping("/publish/{id}")
-    public ResponseEntity<Object> saveAndPublishPost(@PathVariable long id) {
-        return postService.saveAndPublishPost(id);
-
+    @PatchMapping("/publish/{id}")
+    public ResponseEntity<ApiResponse<Post>> publishPost(@PathVariable long id) {
+        Post published = postService.publish(id);
+        return ResponseGenerator.generateResponse("Post published successfully", HttpStatus.OK, published);
     }
 
-    @PutMapping
-    public ResponseEntity<Object> updatePost(@RequestBody Post post) {
-        return postService.updatePost(post);
-
+    @PatchMapping("/unpublish/{id}")
+    public ResponseEntity<ApiResponse<Post>> unpublishPost(@PathVariable long id) {
+        Post published = postService.unpublish(id);
+        return ResponseGenerator.generateResponse("Post unpublished successfully", HttpStatus.OK, published);
     }
 
-    @PutMapping("/{postId}/like")
-    public ResponseEntity<Object> likePost(@PathVariable long postId) {
-        return postService.likePost(postId);
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Post>> updatePost(@PathVariable Long id, @RequestBody PostDTO post) {
+        Post updated = postService.updatePost(id, post);
+        return ResponseGenerator.generateResponse("Post updated successfully", HttpStatus.OK, updated);
     }
 
-    @PutMapping("/{postId}/undo-like")
-    public ResponseEntity<Object> undoLike(@PathVariable long postId) {
-        return postService.undoLike(postId);
+    @PatchMapping("/like/{postId}")
+    public ResponseEntity<ApiResponse<Post>> likePost(@PathVariable long postId) {
+        Post liked = postService.likePost(postId);
+        return ResponseGenerator.generateResponse("Post liked", HttpStatus.OK, liked);
     }
 
-    @PutMapping("/{postId}/dislike")
-    public ResponseEntity<Object> disLikePost(@PathVariable long postId) {
-        return postService.disLikePost(postId);
+    @PatchMapping("/undo-like/{postId}")
+    public ResponseEntity<ApiResponse<Post>> undoLike(@PathVariable long postId) {
+        Post result = postService.undoLike(postId);
+        return ResponseGenerator.generateResponse("Post like undone", HttpStatus.OK, result);
     }
 
-    @PutMapping("/{postId}/undo-dislike")
-    public ResponseEntity<Object> undoDislike(@PathVariable long postId) {
-        return postService.undoDislike(postId);
+    @PatchMapping("/dislike/{postId}")
+    public ResponseEntity<ApiResponse<Post>> disLikePost(@PathVariable long postId) {
+        Post disliked = postService.disLikePost(postId);
+        return ResponseGenerator.generateResponse("Post disliked", HttpStatus.OK, disliked);
+    }
+
+    @PatchMapping("/undo-dislike/{postId}")
+    public ResponseEntity<ApiResponse<Post>> undoDislike(@PathVariable long postId) {
+        Post result = postService.undoDislike(postId);
+        return ResponseGenerator.generateResponse("Post dislike undone", HttpStatus.OK, result);
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Object> deletePost(@PathVariable long postId) {
-        return postService.deletePost(postId);
+    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable long postId) {
+        postService.deletePost(postId);
+        return ResponseGenerator.generateResponse("Post deleted successfully", HttpStatus.OK, null);
     }
 }
