@@ -40,9 +40,35 @@ public class CategoryController {
         return ResponseGenerator.generateResponse("Category updated successfully", HttpStatus.OK, updated);
     }
 
+    @GetMapping("/{id}/delete-preview")
+    public ResponseEntity<ApiResponse<String>> deleteCategoryPreview(@PathVariable Long id) {
+        int postCount = 0;
+        try {
+            Category category = categoryService.getCategoryEntityById(id);
+            postCount = category.getPosts() != null ? category.getPosts().size() : 0;
+        } catch (Exception ignored) {
+        }
+        String message = "Deleting this category will also delete " + postCount
+                + " posts associated with this category. Are you sure you want to proceed?";
+        return ResponseGenerator.generateResponse(message, HttpStatus.OK, null);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id,
+            @RequestParam(value = "confirm", required = false) Boolean confirm) {
+        int postCount = 0;
+        try {
+            Category category = categoryService.getCategoryEntityById(id);
+            postCount = category.getPosts() != null ? category.getPosts().size() : 0;
+        } catch (Exception ignored) {
+        }
+        if (postCount > 0 && (confirm == null || !confirm)) {
+            String message = "Confirmation required: Deleting this category will also delete " + postCount
+                    + " posts.";
+            return ResponseGenerator.generateResponse(message, HttpStatus.BAD_REQUEST, null);
+        }
         categoryService.deleteCategory(id);
-        return ResponseGenerator.generateResponse("Category deleted successfully", HttpStatus.OK, null);
+        String message = "Category deleted successfully.";
+        return ResponseGenerator.generateResponse(message, HttpStatus.OK, null);
     }
 }

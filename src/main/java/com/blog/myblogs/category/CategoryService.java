@@ -47,4 +47,9 @@ public class CategoryService {
     public long getCount() {
         return categoryRepository.count();
     }
+
+    public Category getCategoryEntityById(Long id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + id));
+    }
 }

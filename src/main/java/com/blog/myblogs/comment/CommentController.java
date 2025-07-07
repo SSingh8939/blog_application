@@ -22,6 +22,12 @@ public class CommentController {
         return ResponseGenerator.generateResponse("Comments fetched successfully", HttpStatus.OK, comments);
     }
 
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<ApiResponse<List<Comment>>> getAllCommentsByPostId(@PathVariable Long postId) {
+        List<Comment> comments = commentService.getAllCommentsWithRepliesByPostId(postId);
+        return ResponseGenerator.generateResponse("Comments fetched successfully", HttpStatus.OK, comments);
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<Comment>> saveComment(@RequestBody CommentDTO comment) {
         Comment saved = commentService.saveComment(comment);

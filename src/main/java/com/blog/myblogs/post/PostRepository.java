@@ -20,10 +20,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         @Query("SELECT p From Post p WHERE p.published = false")
         Page<Post> findByUnpublished(boolean published, PageRequest page);
 
-        @Query("SELECT COUNT(p) from Post p WHERE p.categoryId = :categoryId")
+        @Query("SELECT COUNT(p) from Post p WHERE p.category.id = :categoryId")
         long getCountByCategory(long categoryId);
 
-        Page<Post> findAllByCategoryId(long categoryId, PageRequest page);
+        Page<Post> findAllByCategory_Id(long categoryId, PageRequest page);
 
         @Query("SELECT COUNT(p) FROM Post p WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
                         "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
@@ -33,9 +33,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                         "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
         Page<Post> searchByKeyword(String keyword, PageRequest page);
 
-        @Query("SELECT COUNT(p) from Post p WHERE p.adminId = :adminId")
+        @Query("SELECT COUNT(p) from Post p WHERE p.author.id = :adminId")
         long getCountByAdmin(long adminId);
 
-        Page<Post> findAllByAdminId(long adminId, PageRequest page);
+        Page<Post> findAllByAuthor_Id(long authorId, PageRequest page);
 
 }
