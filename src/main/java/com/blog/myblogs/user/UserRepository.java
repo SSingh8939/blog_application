@@ -11,9 +11,9 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByEmail(String email);
+    Optional<User> findByUsername(String username);
 
-    Boolean existsByEmail(String email);
+    Boolean existsByUsername(String username);
 
     Optional<User> findByVerificationToken(String token);
 
@@ -26,4 +26,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.email LIKE %:keyword% OR u.firstName LIKE %:keyword% OR u.lastName LIKE %:keyword%")
     Page<User> searchUsers(String keyword, Pageable pageable);
+
+    boolean existsByEmail(String email);
+
+    Optional<User> findByEmail(String email);
 }

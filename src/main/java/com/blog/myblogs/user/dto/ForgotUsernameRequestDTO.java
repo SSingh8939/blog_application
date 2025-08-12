@@ -1,5 +1,6 @@
 package com.blog.myblogs.user.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,11 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoginDTO {
-
-    @NotBlank(message = "Username is required")
-    private String username;
-
-    @NotBlank(message = "Password is required")
-    private String password;
+public class ForgotUsernameRequestDTO {
+    @NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email")
+    private String email;
 }

@@ -10,7 +10,6 @@ import com.blog.myblogs.category.Category;
 import com.blog.myblogs.comment.Comment;
 import com.blog.myblogs.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -58,6 +57,6 @@ public class Post {
     private Boolean published = false;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 }

@@ -32,13 +32,17 @@ public class UserService {
     private JavaMailSender emailSender;
 
     public UserResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
-        // Check if email exists
+        // Check if username or email exists
+        if (userRepository.existsByUsername(registrationDTO.getUsername())) {
+            throw new RuntimeException("Username is already in use!");
+        }
         if (userRepository.existsByEmail(registrationDTO.getEmail())) {
             throw new RuntimeException("Email is already in use!");
         }
 
         // Create new user
         User user = User.builder()
+                .username(registrationDTO.getUsername())
                 .email(registrationDTO.getEmail())
                 .password(passwordEncoder.encode(registrationDTO.getPassword()))
                 .firstName(registrationDTO.getFirstName())
@@ -61,9 +65,9 @@ public class UserService {
         return convertToResponseDTO(user);
     }
 
-    public UserResponseDTO getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+    public UserResponseDTO getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         return convertToResponseDTO(user);
     }
 
@@ -132,6 +136,13 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void sendForgotUsernameEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        sendUsernameResetEmail(user);
+
+    }
+
     public void verifyEmail(String token) {
         User user = userRepository.findByVerificationToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid verification token"));
@@ -192,9 +203,9 @@ public class UserService {
         return userRepository.countByRole(role);
     }
 
-    public void updateLastLogin(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+    public void updateLastLogin(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
 
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
@@ -239,9 +250,24 @@ public class UserService {
         }
     }
 
+    private void sendUsernameResetEmail(User user) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(user.getEmail());
+            message.setSubject("Your Username - MyBlogs");
+            message.setText("Hello " + user.getFirstName() + ",\n\n" +
+                    "Your username for MyBlogs is: " + user.getUsername() + "\n\n" +
+                    "If you did not request this, please ignore this email.");
+            emailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send username reset email: " + e.getMessage());
+        }
+    }
+
     private UserResponseDTO convertToResponseDTO(User user) {
         return UserResponseDTO.builder()
                 .id(user.getId())
+                .username(user.getUsername())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())

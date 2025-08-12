@@ -28,13 +28,13 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        UserResponseDTO user = userService.getUserByEmail(username);
+        UserResponseDTO user = userService.getUserByUsername(username);
         return ResponseGenerator.generateResponse("User profile fetched successfully", HttpStatus.OK, user);
     }
 
     @GetMapping("/profile/{username}")
     public ResponseEntity<ApiResponse<UserResponseDTO>> getUserProfile(@PathVariable String username) {
-        UserResponseDTO user = userService.getUserByEmail(username);
+        UserResponseDTO user = userService.getUserByUsername(username);
         return ResponseGenerator.generateResponse("User profile fetched successfully", HttpStatus.OK, user);
     }
 

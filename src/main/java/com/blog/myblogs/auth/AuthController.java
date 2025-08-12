@@ -42,7 +42,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<JwtAuthResponseDTO>> authenticateUser(@Valid @RequestBody LoginDTO loginDTO) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginDTO.getEmail(),
+                        loginDTO.getUsername(),
                         loginDTO.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -52,8 +52,8 @@ public class AuthController {
         // Update last login time
         userService.updateLastLogin(authentication.getName());
 
-        // Get user details by email
-        UserResponseDTO userResponse = userService.getUserByEmail(loginDTO.getEmail());
+        // Get user details by username
+        UserResponseDTO userResponse = userService.getUserByUsername(loginDTO.getUsername());
 
         JwtAuthResponseDTO authResponse = JwtAuthResponseDTO.builder()
                 .accessToken(jwt)
@@ -84,6 +84,13 @@ public class AuthController {
                 "Your password has been reset successfully. You can now login with your new password.");
     }
 
+    @PostMapping("/forgot-username")
+    public ResponseEntity<ApiResponse<String>> forgotUsername(@Valid @RequestBody ForgotUsernameRequestDTO requestDTO) {
+        userService.sendForgotUsernameEmail(requestDTO.getEmail());
+        return ResponseGenerator.generateResponse("If the email exists, your username has been sent.", HttpStatus.OK,
+                null);
+    }
+
     @PostMapping("/refresh-token")
     public ResponseEntity<ApiResponse<JwtAuthResponseDTO>> refreshToken(
             @RequestHeader("Authorization") String bearerToken) {
@@ -93,7 +100,7 @@ public class AuthController {
             String username = tokenProvider.getUsernameFromToken(token);
             String newToken = tokenProvider.generateTokenFromUsername(username);
 
-            UserResponseDTO userResponse = userService.getUserByEmail(username);
+            UserResponseDTO userResponse = userService.getUserByUsername(username);
 
             JwtAuthResponseDTO authResponse = JwtAuthResponseDTO.builder()
                     .accessToken(newToken)
