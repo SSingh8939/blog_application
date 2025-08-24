@@ -23,7 +23,6 @@ public class UserResponseDTO {
     private String fullName;
     private Role role;
     private Boolean enabled;
-    private Boolean emailVerified;
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
 }

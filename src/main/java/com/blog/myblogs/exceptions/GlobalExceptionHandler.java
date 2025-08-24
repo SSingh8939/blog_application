@@ -2,9 +2,8 @@ package com.blog.myblogs.exceptions;
 
 import com.blog.myblogs.common.*;
 
-import java.util.Map;
-
 import org.springframework.http.*;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +29,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
-        // Map<String, String> errors = new java.util.HashMap<>();
-        // ex.getBindingResult().getFieldErrors()
-        // .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseGenerator.generateResponse("Validation failed", HttpStatus.BAD_REQUEST, null);
+    }
+
+    @ExceptionHandler(DuplicateDataException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateData(DuplicateDataException ex) {
+        return ResponseGenerator.generateResponse(ex.getMessage(), HttpStatus.CONFLICT, null);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseGenerator.generateResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, null);
     }
 }

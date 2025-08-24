@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,34 +41,45 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<JwtAuthResponseDTO>> authenticateUser(@Valid @RequestBody LoginDTO loginDTO) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginDTO.getUsername(),
-                        loginDTO.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = tokenProvider.generateToken(authentication);
 
-        // Update last login time
-        userService.updateLastLogin(authentication.getName());
 
-        // Get user details by username
-        UserResponseDTO userResponse = userService.getUserByUsername(loginDTO.getUsername());
 
-        JwtAuthResponseDTO authResponse = JwtAuthResponseDTO.builder()
-                .accessToken(jwt)
-                .user(userResponse)
-                .build();
 
-        return ResponseGenerator.generateResponse("User signed in successfully", HttpStatus.OK, authResponse);
+
+
+
+    var userOpt = userService.getUserRepository().findByUsername(loginDTO.getUsername());
+    if (userOpt.isEmpty()) {
+        throw new com.blog.myblogs.exceptions.ResourceNotFoundException("Username not found");
     }
+    var user = userOpt.get();
+    if (!userService.getPasswordEncoder().matches(loginDTO.getPassword(), user.getPassword())) {
+        throw new com.blog.myblogs.exceptions.DuplicateDataException("Invalid password");
+    }
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+            loginDTO.getUsername(),
+            loginDTO.getPassword()));
 
-    @GetMapping("/verify-email")
-    public ResponseEntity<ApiResponse<String>> verifyEmail(@RequestParam String token) {
-        userService.verifyEmail(token);
-        return ResponseGenerator.generateResponse("Email verified successfully", HttpStatus.OK,
-                "Your email has been verified. You can now login to your account.");
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    String jwt = tokenProvider.generateToken(authentication);
+
+    // Update last login time
+    userService.updateLastLogin(authentication.getName());
+
+    // Get user details by username
+    UserResponseDTO userResponse = userService.getUserByUsername(loginDTO.getUsername());
+
+    JwtAuthResponseDTO authResponse = JwtAuthResponseDTO.builder()
+        .accessToken(jwt)
+        .user(userResponse)
+        .build();
+
+    return ResponseGenerator.generateResponse("User signed in successfully", HttpStatus.OK, authResponse);
+        }
     }
 
     @PostMapping("/forgot-password")

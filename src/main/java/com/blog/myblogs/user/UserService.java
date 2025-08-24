@@ -1,6 +1,7 @@
 package com.blog.myblogs.user;
 
 import com.blog.myblogs.exceptions.ResourceNotFoundException;
+import com.blog.myblogs.exceptions.DuplicateDataException;
 import com.blog.myblogs.user.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,10 +35,10 @@ public class UserService {
     public UserResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
         // Check if username or email exists
         if (userRepository.existsByUsername(registrationDTO.getUsername())) {
-            throw new RuntimeException("Username is already in use!");
+            throw new DuplicateDataException("Username is already in use!");
         }
         if (userRepository.existsByEmail(registrationDTO.getEmail())) {
-            throw new RuntimeException("Email is already in use!");
+            throw new DuplicateDataException("Email is already in use!");
         }
 
         // Create new user
@@ -48,13 +49,9 @@ public class UserService {
                 .firstName(registrationDTO.getFirstName())
                 .lastName(registrationDTO.getLastName())
                 .role(registrationDTO.getRole())
-                .verificationToken(UUID.randomUUID().toString())
                 .build();
 
         User savedUser = userRepository.save(user);
-
-        // Send verification email
-        sendVerificationEmail(savedUser);
 
         return convertToResponseDTO(savedUser);
     }
@@ -143,17 +140,6 @@ public class UserService {
 
     }
 
-    public void verifyEmail(String token) {
-        User user = userRepository.findByVerificationToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid verification token"));
-
-        user.setEmailVerified(true);
-        user.setVerificationToken(null);
-        user.setUpdatedAt(LocalDateTime.now());
-
-        userRepository.save(user);
-    }
-
     public UserResponseDTO updateUserRole(Long userId, Role newRole) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
@@ -216,22 +202,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 
-    private void sendVerificationEmail(User user) {
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(user.getEmail());
-            message.setSubject("Email Verification - MyBlogs");
-            message.setText("Hello " + user.getFirstName() + ",\n\n" +
-                    "Please click the following link to verify your email address:\n" +
-                    "http://localhost:8080/api/auth/verify-email?token=" + user.getVerificationToken() + "\n\n" +
-                    "Thank you for registering with MyBlogs!");
-
-            emailSender.send(message);
-        } catch (Exception e) {
-            // Log the error but don't fail the registration
-            System.err.println("Failed to send verification email: " + e.getMessage());
-        }
-    }
+    // removed sendVerificationEmail method
 
     private void sendPasswordResetEmail(User user, String resetToken) {
         try {
@@ -274,7 +245,6 @@ public class UserService {
                 .fullName(user.getFullName())
                 .role(user.getRole())
                 .enabled(user.getEnabled())
-                .emailVerified(user.getEmailVerified())
                 .createdAt(user.getCreatedAt())
                 .lastLogin(user.getLastLogin())
                 .build();

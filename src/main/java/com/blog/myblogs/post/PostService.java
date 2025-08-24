@@ -1,11 +1,13 @@
 package com.blog.myblogs.post;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.blog.myblogs.category.Category;
 import com.blog.myblogs.category.CategoryRepository;
@@ -107,21 +109,53 @@ public class PostService {
         return getPostsWithComment(posts);
     }
 
-    public Post savePost(PostDTO dto) {
+    public Post savePost(PostDTO dto, MultipartFile image) {
         User author = userRepository.findById(dto.getAdminId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + dto.getAdminId()));
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + dto.getCategoryId()));
+        String imageUrl = saveImage(image, null);
         Post post = Post.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .author(author)
                 .category(category)
+                .imageUrl(imageUrl)
+                .published(false)
                 .build();
 
-        Post p = postRepository.save(post.toBuilder().published(false).build());
+        Post p = postRepository.save(post);
 
         return getSinglePostWithComment(p);
+    }
+
+    public String saveImage(MultipartFile image, String existingPath) {
+        String fileDir = "images";
+        String filePath = fileDir + File.separator + System.currentTimeMillis() + image.getOriginalFilename();
+
+        if (image.isEmpty() || image.getOriginalFilename() == null) {
+            return "";
+        }
+
+        try {
+            if (existingPath != null && !existingPath.isEmpty()) {
+                File oldFile = new File(existingPath);
+                if (oldFile.exists()) {
+                    oldFile.delete();
+                }
+            }
+            File f = new File(fileDir);
+            if (!f.exists()) {
+                f.mkdirs();
+            }
+            image.transferTo(new File(filePath));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to save image");
+        }
+
+        return filePath;
     }
 
     public Post publish(long id) {
@@ -148,16 +182,20 @@ public class PostService {
         return getSinglePostWithComment(p);
     }
 
-    public Post updatePost(Long id, PostDTO dto) {
+    public Post updatePost(Long id, PostDTO dto, MultipartFile image) {
         Post existing = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with ID: " + id));
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + dto.getCategoryId()));
+
+        String imageUrl = saveImage(image, existing.getImageUrl());
+
         Post updated = existing.toBuilder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .category(category)
                 .updatedAt(LocalDateTime.now())
+                .imageUrl(imageUrl)
                 .build();
 
         Post p = postRepository.save(updated);

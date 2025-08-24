@@ -5,6 +5,7 @@ import com.blog.myblogs.common.ResponseGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -103,9 +104,12 @@ public class PostController {
         return ResponseGenerator.generateResponse("Search results fetched successfully", HttpStatus.OK, posts);
     }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<Post>> savePost(@RequestBody PostDTO dto) {
-        Post saved = postService.savePost(dto);
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<ApiResponse<Post>> savePost(
+            @RequestPart("post") PostDTO dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        Post saved = postService.savePost(dto, image);
         return ResponseGenerator.generateResponse("Post saved successfully", HttpStatus.CREATED, saved);
     }
 
@@ -122,8 +126,9 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Post>> updatePost(@PathVariable Long id, @RequestBody PostDTO post) {
-        Post updated = postService.updatePost(id, post);
+    public ResponseEntity<ApiResponse<Post>> updatePost(@PathVariable Long id, @RequestPart PostDTO post,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+        Post updated = postService.updatePost(id, post, image);
         return ResponseGenerator.generateResponse("Post updated successfully", HttpStatus.OK, updated);
     }
 
@@ -156,4 +161,5 @@ public class PostController {
         postService.deletePost(postId);
         return ResponseGenerator.generateResponse("Post deleted successfully", HttpStatus.OK, null);
     }
+
 }

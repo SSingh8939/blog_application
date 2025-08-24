@@ -31,6 +31,8 @@ public class Post {
 
     private String title;
 
+    private String imageUrl;
+
     @Column(columnDefinition = "LONGTEXT")
     private String content;
 
