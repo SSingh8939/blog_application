@@ -54,15 +54,6 @@ public class User implements UserDetails {
     @Builder.Default
     private Boolean enabled = true;
 
-    @Builder.Default
-    private Boolean accountNonExpired = true;
-
-    @Builder.Default
-    private Boolean accountNonLocked = true;
-
-    @Builder.Default
-    private Boolean credentialsNonExpired = true;
-
     @Column(name = "reset_token")
     private String resetToken;
 
@@ -98,21 +89,6 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return accountNonExpired;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
     }
 
     @Override

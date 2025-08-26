@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserRegistrationDTO {
 
-
     @NotBlank(message = "Username is required")
     private String username;
 
@@ -30,6 +29,7 @@ public class UserRegistrationDTO {
     @NotBlank(message = "First name is required")
     private String firstName;
 
+    @NotBlank(message = "Last name is required")
     private String lastName;
 
     @Builder.Default

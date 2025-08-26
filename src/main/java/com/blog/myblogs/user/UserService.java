@@ -35,10 +35,10 @@ public class UserService {
     public UserResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
         // Check if username or email exists
         if (userRepository.existsByUsername(registrationDTO.getUsername())) {
-            throw new DuplicateDataException("Username is already in use!");
+            throw new DuplicateDataException("Username already exists!");
         }
         if (userRepository.existsByEmail(registrationDTO.getEmail())) {
-            throw new DuplicateDataException("Email is already in use!");
+            throw new DuplicateDataException("Email already exists!");
         }
 
         // Create new user

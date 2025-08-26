@@ -1,7 +1,9 @@
+com\blog\myblogs\user\dto\ForgotUsernameRequestDTO$ForgotUsernameRequestDTOBuilder.class
 com\blog\myblogs\user\dto\PasswordResetDTO$PasswordResetDTOBuilder.class
 com\blog\myblogs\category\CategoryService.class
 com\blog\myblogs\security\CustomUserDetailsService.class
 com\blog\myblogs\category\Category.class
+com\blog\myblogs\user\dto\ForgotUsernameRequestDTO.class
 com\blog\myblogs\exceptions\ResourceNotFoundException.class
 com\blog\myblogs\user\UserController.class
 com\blog\myblogs\comment\CommentRepository.class
@@ -33,6 +35,7 @@ com\blog\myblogs\user\dto\JwtAuthResponseDTO.class
 com\blog\myblogs\common\ApiResponse.class
 com\blog\myblogs\post\PostDTO.class
 com\blog\myblogs\comment\CommentDTO.class
+com\blog\myblogs\exceptions\DuplicateDataException.class
 com\blog\myblogs\user\User$UserBuilder.class
 com\blog\myblogs\category\CategoryController.class
 com\blog\myblogs\user\dto\LoginDTO$LoginDTOBuilder.class
