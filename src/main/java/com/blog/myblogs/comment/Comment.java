@@ -40,7 +40,8 @@ public class Comment {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonManagedReference
     private User author;
 
     @ManyToOne

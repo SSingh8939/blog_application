@@ -43,14 +43,19 @@ public class CommentService {
                 return rootLevelComments;
         }
 
-        public List<Comment> getAllCommentsWithReplies() {
+        public List<Comment> getAllComments() {
                 List<Comment> allComments = commentRepository.findAll();
-                return getRootLevelCommentsWithReplies(allComments);
+                return allComments;
         }
 
         public List<Comment> getAllCommentsWithRepliesByPostId(Long id) {
                 List<Comment> allComments = commentRepository.findByPost_Id(id);
                 return getRootLevelCommentsWithReplies(allComments);
+        }
+
+        public List<Comment> getAllCommentsByAuthorId(Long id) {
+                List<Comment> allComments = commentRepository.findByAuthor_Id(id);
+                return allComments;
         }
 
         public Comment saveComment(CommentDTO dto) {
@@ -90,28 +95,6 @@ public class CommentService {
                 existing.setUpdatedAt(LocalDateTime.now());
 
                 Comment saved = commentRepository.save(existing);
-                return saved;
-        }
-
-        public Comment addReply(CommentDTO dto) {
-                User author = userRepository.findById(dto.getAuthorId())
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "User not found with id: " + dto.getAuthorId()));
-                Post post = postRepository.findById(dto.getPostId())
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Post not found with id: " + dto.getPostId()));
-                Comment parent = commentRepository.findById(dto.getParentId())
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Parent comment not found with id: " + dto.getParentId()));
-
-                Comment reply = Comment.builder()
-                                .content(dto.getContent())
-                                .author(author)
-                                .post(post)
-                                .parent(parent)
-                                .build();
-
-                Comment saved = commentRepository.save(reply);
                 return saved;
         }
 

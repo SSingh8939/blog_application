@@ -66,42 +66,46 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
                         // Public endpoints
+                        .requestMatchers("/api/user/post/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/post/published").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/post/published/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/post/search").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/post/category/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/category").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/comment/post/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/api/post/published").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/api/post/published/**").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/api/post/search").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/api/post/category/**").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/api/category").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/api/comment/post/**").permitAll()
+                        // .requestMatchers("/swagger-ui/**", "/swagger-ui.html",
+                        // "/v3/api-docs/**").permitAll()
+                        // .requestMatchers("/actuator/**").permitAll()
 
-                        // Admin only endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/post").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/post/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/post/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/post/publish/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/post/unpublish/**").hasRole("ADMIN")
-                        .requestMatchers("/api/post/unpublished").hasRole("ADMIN")
-                        .requestMatchers("/api/post/count/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/category").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/category/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/category/**").hasRole("ADMIN")
-                        .requestMatchers("/api/user/admin/**").hasRole("ADMIN")
+                        // // Admin only endpoints
+                        // .requestMatchers(HttpMethod.POST, "/api/post").hasRole("ADMIN")
+                        // .requestMatchers(HttpMethod.PUT, "/api/post/**").hasRole("ADMIN")
+                        // .requestMatchers(HttpMethod.DELETE, "/api/post/**").hasRole("ADMIN")
+                        // .requestMatchers(HttpMethod.PATCH, "/api/post/publish/**").hasRole("ADMIN")
+                        // .requestMatchers(HttpMethod.PATCH, "/api/post/unpublish/**").hasRole("ADMIN")
+                        // .requestMatchers("/api/post/unpublished").hasRole("ADMIN")
+                        // .requestMatchers("/api/post/count/**").hasRole("ADMIN")
+                        // .requestMatchers(HttpMethod.POST, "/api/category").hasRole("ADMIN")
+                        // .requestMatchers(HttpMethod.PUT, "/api/category/**").hasRole("ADMIN")
+                        // .requestMatchers(HttpMethod.DELETE, "/api/category/**").hasRole("ADMIN")
+                        // .requestMatchers("/api/user/admin/**").hasRole("ADMIN")
 
-                        // Author and Admin endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/post").hasAnyRole("ADMIN", "AUTHOR")
-                        .requestMatchers(HttpMethod.GET, "/api/post/admin/**").hasAnyRole("ADMIN", "AUTHOR")
+                        // // Author and Admin endpoints
+                        // .requestMatchers(HttpMethod.GET, "/api/post").hasAnyRole("ADMIN", "AUTHOR")
+                        // .requestMatchers(HttpMethod.GET, "/api/post/admin/**").hasAnyRole("ADMIN",
+                        // "AUTHOR")
 
-                        // All authenticated users
-                        .requestMatchers(HttpMethod.POST, "/api/comment").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/comment/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/comment/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/post/like/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/post/dislike/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/post/undo-like/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/post/undo-dislike/**").authenticated()
-                        .requestMatchers("/api/user/profile/**").authenticated()
+                        // // All authenticated users
+                        // .requestMatchers(HttpMethod.POST, "/api/comment").authenticated()
+                        // .requestMatchers(HttpMethod.PUT, "/api/comment/**").authenticated()
+                        // .requestMatchers(HttpMethod.DELETE, "/api/comment/**").authenticated()
+                        // .requestMatchers(HttpMethod.PATCH, "/api/post/like/**").authenticated()
+                        // .requestMatchers(HttpMethod.PATCH, "/api/post/dislike/**").authenticated()
+                        // .requestMatchers(HttpMethod.PATCH, "/api/post/undo-like/**").authenticated()
+                        // .requestMatchers(HttpMethod.PATCH,
+                        // "/api/post/undo-dislike/**").authenticated()
+                        // .requestMatchers("/api/user/profile/**").authenticated()
 
                         .anyRequest().authenticated());
 

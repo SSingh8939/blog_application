@@ -1,5 +1,7 @@
 package com.blog.myblogs.post;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,4 +18,5 @@ public class PostDTO {
 
     private Long adminId;
     private Long categoryId;
+    private MultipartFile image;
 }

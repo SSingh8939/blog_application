@@ -2,6 +2,7 @@ package com.blog.myblogs.user;
 
 import com.blog.myblogs.comment.Comment;
 import com.blog.myblogs.post.Post;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -71,9 +72,11 @@ public class User implements UserDetails {
     private LocalDateTime lastLogin;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private java.util.List<Post> posts;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private java.util.List<Comment> comments;
 
     @Override

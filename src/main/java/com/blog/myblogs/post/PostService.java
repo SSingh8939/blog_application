@@ -1,6 +1,7 @@
 package com.blog.myblogs.post;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,17 +38,21 @@ public class PostService {
         return postRepository.count();
     }
 
-    public List<Post> getPostsWithComment(List<Post> posts) {
-        posts.forEach(post -> {
-            List<Comment> comments = commentService.getAllCommentsWithRepliesByPostId(post.getId());
+    public Post getSinglePostWithComment(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
 
-            post.setComments(comments);
-        });
-
-        return posts;
+        List<Comment> comments = commentService.getAllCommentsWithRepliesByPostId(post.getId());
+        post.setComments(comments);
+        return post;
     }
 
-    public Post getSinglePostWithComment(Post post) {
+    public Post getSinglePublishedPostWithComment(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
+        if (!post.getPublished()) {
+            throw new ResourceNotFoundException("Post not found with id: " + id);
+        }
         List<Comment> comments = commentService.getAllCommentsWithRepliesByPostId(post.getId());
         post.setComments(comments);
         return post;
@@ -58,7 +63,7 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<Post> posts = postRepository.findAll(pageRequest).getContent();
 
-        return getPostsWithComment(posts);
+        return posts;
     }
 
     public long getAllPublishedPostCount() {
@@ -70,7 +75,7 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<Post> posts = postRepository.findByPublished(true, pageRequest).getContent();
 
-        return getPostsWithComment(posts);
+        return posts;
     }
 
     public long getAllUnpublishedPostCount() {
@@ -82,7 +87,7 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<Post> posts = postRepository.findByUnpublished(true, pageRequest).getContent();
 
-        return getPostsWithComment(posts);
+        return posts;
     }
 
     public long getAllPostCountByCategory(long categoryId) {
@@ -94,7 +99,15 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<Post> posts = postRepository.findAllByCategory_Id(categoryId, pageRequest).getContent();
 
-        return getPostsWithComment(posts);
+        return posts;
+    }
+
+    public List<Post> getPublishedPostsByCategory(long categoryId, int page, int size) {
+        validatePagination(page, size);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<Post> posts = postRepository.findAllPublishedByCategory_Id(categoryId, pageRequest).getContent();
+
+        return posts;
     }
 
     public long getAllPostCountByAdmin(long adminId) {
@@ -106,7 +119,7 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<Post> posts = postRepository.findAllByAuthor_Id(adminId, pageRequest).getContent();
 
-        return getPostsWithComment(posts);
+        return posts;
     }
 
     public Post savePost(PostDTO dto, MultipartFile image) {
@@ -126,14 +139,37 @@ public class PostService {
 
         Post p = postRepository.save(post);
 
-        return getSinglePostWithComment(p);
+        return p;
+    }
+
+    public Post saveAndPublishPost(PostDTO dto, MultipartFile image) {
+        User author = userRepository.findById(dto.getAdminId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + dto.getAdminId()));
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + dto.getCategoryId()));
+        String imageUrl = saveImage(image, null);
+        Post post = Post.builder()
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .author(author)
+                .category(category)
+                .imageUrl(imageUrl)
+                .published(true)
+                .build();
+
+        Post p = postRepository.save(post);
+
+        return p;
     }
 
     public String saveImage(MultipartFile image, String existingPath) {
-        String fileDir = "images";
+        String fileDir = System.getProperty("user.dir") + "/uploads/";
         String filePath = fileDir + File.separator + System.currentTimeMillis() + image.getOriginalFilename();
 
         if (image.isEmpty() || image.getOriginalFilename() == null) {
+            if (existingPath != null && !existingPath.isEmpty()) {
+                return existingPath;
+            }
             return "";
         }
 
@@ -152,7 +188,7 @@ public class PostService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to save image");
+            throw new RuntimeException("File Upload Failed", e);
         }
 
         return filePath;
@@ -167,7 +203,7 @@ public class PostService {
                 .build();
         Post p = postRepository.save(updated);
 
-        return getSinglePostWithComment(p);
+        return p;
     }
 
     public Post unpublish(long id) {
@@ -179,7 +215,7 @@ public class PostService {
                 .build();
         Post p = postRepository.save(updated);
 
-        return getSinglePostWithComment(p);
+        return p;
     }
 
     public Post updatePost(Long id, PostDTO dto, MultipartFile image) {
@@ -200,7 +236,7 @@ public class PostService {
 
         Post p = postRepository.save(updated);
 
-        return getSinglePostWithComment(p);
+        return p;
     }
 
     private Post modifyPostLikesOrDislikes(long postId, boolean isLike, boolean isIncrement) {
@@ -223,7 +259,7 @@ public class PostService {
 
         Post p = postRepository.save(updatedPost);
 
-        return getSinglePostWithComment(p);
+        return p;
     }
 
     public Post likePost(long postId) {
@@ -260,7 +296,15 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<Post> posts = postRepository.searchByKeyword(keyword, pageRequest).getContent();
 
-        return getPostsWithComment(posts);
+        return posts;
+    }
+
+    public List<Post> searchPublishedPosts(String keyword, int page, int size) {
+        validatePagination(page, size);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<Post> posts = postRepository.searchPublishedByKeyword(keyword, pageRequest).getContent();
+
+        return posts;
     }
 
     private void validatePagination(int page, int size) {

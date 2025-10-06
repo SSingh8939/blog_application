@@ -18,13 +18,19 @@ public class CommentController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Comment>>> getAllComments() {
-        List<Comment> comments = commentService.getAllCommentsWithReplies();
+        List<Comment> comments = commentService.getAllComments();
         return ResponseGenerator.generateResponse("Comments fetched successfully", HttpStatus.OK, comments);
     }
 
     @GetMapping("/post/{postId}")
     public ResponseEntity<ApiResponse<List<Comment>>> getAllCommentsByPostId(@PathVariable Long postId) {
         List<Comment> comments = commentService.getAllCommentsWithRepliesByPostId(postId);
+        return ResponseGenerator.generateResponse("Comments fetched successfully", HttpStatus.OK, comments);
+    }
+
+    @GetMapping("/{authorId}")
+    public ResponseEntity<ApiResponse<List<Comment>>> getAllCommentsByAuthorId(@PathVariable Long authorId) {
+        List<Comment> comments = commentService.getAllCommentsByAuthorId(authorId);
         return ResponseGenerator.generateResponse("Comments fetched successfully", HttpStatus.OK, comments);
     }
 
@@ -38,12 +44,6 @@ public class CommentController {
     public ResponseEntity<ApiResponse<Comment>> updateComment(@PathVariable Long id, @RequestBody CommentDTO comment) {
         Comment updated = commentService.updateComment(id, comment);
         return ResponseGenerator.generateResponse("Comment updated successfully", HttpStatus.OK, updated);
-    }
-
-    @PostMapping("/reply")
-    public ResponseEntity<ApiResponse<Comment>> addReply(@RequestBody CommentDTO reply) {
-        Comment savedReply = commentService.addReply(reply);
-        return ResponseGenerator.generateResponse("Reply added successfully", HttpStatus.CREATED, savedReply);
     }
 
     @DeleteMapping("/{id}")
